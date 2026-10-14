@@ -1,0 +1,428 @@
+/**
+ * インスペクタと需要バーの説明のスタイル（`docs/m3-plan.md` §4 の W3b）。
+ *
+ * `hud.css` は他パッケージの担当なので触らない。ここは W3b のコンポーネントからだけ
+ * import する。トークン（--panel / --text / --hud-* ）は styles.css と hud.css で
+ * 定義済みのものを借りる。
+ *
+ * **`pointer-events` の注意**: `.hud` は `pointer-events: none`（ゲーム画面のドラッグを
+ * 邪魔しないため）で、これは**継承される**。触りたい要素には個別に `auto` を立てる。
+ * `.hud-demand` に `none` が指定されているが、子の要素へ直接 `auto` を書けば
+ * 継承より優先されるので、hud.css を書き換える必要はない。
+ */
+
+/* ---------- 共通の行 ---------- */
+
+.ins-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--hud-border);
+}
+
+.ins-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.ins-heading {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.ins-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ins-row-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ins-row-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ins-row-value {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.ins-metric {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.ins-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/**
+ * 「その数字がどこに繋がるか」の一文。
+ * このゲームの情報設計の肝なので、小さくても必ず読める濃度にする（薄くしすぎない）。
+ */
+.ins-link {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: 0.72;
+}
+
+.ins-quiet {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: 0.55;
+}
+
+.ins-warn {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ins-bad);
+}
+
+.ins-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ins-up {
+  color: var(--ins-good);
+}
+
+.ins-down {
+  color: var(--ins-bad);
+}
+
+.ins-flat {
+  opacity: 0.5;
+}
+
+/**
+ * 相手先ごとの内訳（`docs/m3-plan.md` §4 の 3-4、`docs/m5-plan.md` §3-4）。
+ * 「出発中 N台 / 向かっている M台」の下にぶら下げる小さな一覧なので、
+ * 本文の ins-row-value より一段小さく静かに見せる（.ins-quiet に近い濃度）。
+ */
+.ins-counterpart-list {
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ins-counterpart-row {
+  font-size: 11.5px;
+  line-height: 1.4;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- トリップ追跡 ---------- */
+
+.ins-trace-section {
+  gap: 8px;
+}
+
+.ins-trace-route,
+.ins-trace-timing {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ins-trace-route {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.ins-trace-timing {
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0.72;
+}
+
+/* ---------- 満足度バー ---------- */
+
+.ins-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--hud-track);
+  overflow: hidden;
+}
+
+.ins-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 999px;
+}
+
+.ins-bar-good {
+  background: var(--ins-good);
+}
+
+.ins-bar-mid {
+  background: var(--ins-mid);
+}
+
+.ins-bar-bad {
+  background: var(--ins-bad);
+}
+
+/** 退去ラインの目盛り。「30 が危ない」を数字を読まずに分からせる */
+.ins-bar-mark {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--text);
+  opacity: 0.45;
+}
+
+/* ---------- インスペクタのカード ---------- */
+
+/**
+ * `.hud` は flex column + space-between。ここを伸縮させて中央領域を占め、
+ * カードを下寄せにすると、ツールバーのすぐ上に出る（＝親指の近く）。
+ */
+.ins-slot {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px 10px;
+  pointer-events: none;
+}
+
+/**
+ * 高さを 46vh で頭打ちにする。カードは `pointer-events: auto` なので、背が高いと
+ * マップのタップを奪って**別の建物を選び直せなくなる**（実測で踏んだ）。
+ * ボトムシートとして下半分に留め、上半分はいつでも触れるようにしておく。
+ */
+.ins-card {
+  pointer-events: auto;
+  width: min(340px, 100%);
+  max-height: min(100%, 46vh);
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: 0 4px 18px var(--hud-shadow);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.ins-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-bottom: 1px solid var(--hud-border);
+}
+
+.ins-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ins-title-main {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ins-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--hud-track);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ins-pos {
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.45;
+  white-space: nowrap;
+}
+
+/** スマホ優先。タップ領域は 44×44 を切らない（実装書 §12） */
+.ins-close {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ins-close:hover {
+  background: var(--hud-track);
+}
+
+.ins-body {
+  padding: 4px 14px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- 需要バーの説明 ---------- */
+
+.dem-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: min(280px, 100%);
+}
+
+/**
+ * 需要バーの行をタップできるようにする。
+ *
+ * 高さは 36px にしてある。44px にすると3行で 130px を超え、スマホの上部を需要バーが
+ * 占領してマップが読めなくなる（M3 の目的そのものを損なう）。横幅はパネル全幅
+ * （最大 280px）あるので、指の当たりは十分に広い。**開いたあとのパネル側の操作
+ * （閉じるボタン）は 44×44 を守っている。**
+ */
+.dem-row {
+  pointer-events: auto;
+  width: 100%;
+  min-height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.dem-row-open {
+  background: var(--hud-track);
+}
+
+.dem-hint {
+  margin: 0;
+  font-size: 10px;
+  text-align: center;
+  opacity: 0.45;
+}
+
+/**
+ * 内訳パネル。高さを 46vh で頭打ちにするのはインスペクタと同じ理由
+ * （背が高いとマップを覆ってしまう）。中身だけがスクロールし、閉じるボタンは残す。
+ */
+.dem-panel {
+  pointer-events: auto;
+  width: 100%;
+  max-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 4px 16px var(--hud-shadow);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.dem-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 14px 4px;
+}
+
+.dem-foot {
+  flex: 0 0 auto;
+  padding: 6px 14px 10px;
+  border-top: 1px solid var(--hud-border);
+}
+
+.dem-zone-name {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.dem-glyph {
+  display: inline-block;
+  min-width: 2.2em;
+  text-align: right;
+}
+
+.dem-num {
+  display: inline-block;
+  min-width: 3.2em;
+  text-align: right;
+  font-weight: 600;
+  opacity: 0.65;
+}
+
+/** バーをもう一度タップしても閉じられるが、明示的な出口も置いておく */
+.dem-close {
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: var(--hud-track);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- 色トークン ---------- */
+
+:root {
+  --ins-good: #4c9a5a;
+  --ins-mid: #c99f45;
+  --ins-bad: #c4553f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ins-good: #6bbb79;
+    --ins-mid: #e0b352;
+    --ins-bad: #e0745c;
+  }
+}

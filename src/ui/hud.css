@@ -1,0 +1,426 @@
+/**
+ * HUD オーバーレイのスタイル（実装書 §12.2/12.3、計画書 §6: フラット + ソフトシャドウ）。
+ * ライト/ダークは prefers-color-scheme で切り替える。--bg/--text/--panel は src/styles.css で
+ * 定義済みのものを使う。RCI トークンはここで src/render/theme.ts と同値を CSS 変数として持つ
+ * （theme.ts は Pixi 用の数値なので、CSS 側では文字列として複製する）。
+ */
+
+:root {
+  --hud-residential: #7cb06a;
+  --hud-commercial: #5b9bd5;
+  --hud-industrial: #e0b352;
+  --hud-shadow: rgba(0, 0, 0, 0.16);
+  --hud-track: rgba(0, 0, 0, 0.08);
+  --hud-border: rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hud-residential: #6da05c;
+    --hud-commercial: #4f8ec4;
+    --hud-industrial: #c99f45;
+    --hud-shadow: rgba(0, 0, 0, 0.4);
+    --hud-track: rgba(255, 255, 255, 0.12);
+    --hud-border: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+/* ---------- 上部: 資金/人口/日数 + 速度 + RCI需要 ---------- */
+
+.hud-top-stack {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 0;
+}
+
+.hud-topbar {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+}
+
+.hud-topbar-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  padding: 4px 4px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.hud-stat {
+  white-space: nowrap;
+}
+
+.hud-speedgroup {
+  display: flex;
+  gap: 2px;
+}
+
+.hud-speed-btn {
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hud-speed-btn.active {
+  background: var(--hud-track);
+}
+
+.hud-breakdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 4px 16px var(--hud-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1;
+}
+
+.hud-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.hud-breakdown-net {
+  border-top: 1px solid var(--hud-border);
+  padding-top: 4px;
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+/* ---------- RCI需要バー ---------- */
+
+.hud-demand {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: min(280px, 100%);
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 1px 6px var(--hud-shadow);
+}
+
+.hud-demand-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.hud-demand-label {
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.hud-demand-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hud-track);
+  overflow: hidden;
+}
+
+.hud-demand-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+}
+
+.hud-demand-residential {
+  background: var(--hud-residential);
+}
+
+.hud-demand-commercial {
+  background: var(--hud-commercial);
+}
+
+.hud-demand-industrial {
+  background: var(--hud-industrial);
+}
+
+.hud-demand-value {
+  text-align: right;
+  color: var(--text);
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 下部: トースト + ツールバー ---------- */
+
+.hud-bottom-stack {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.hud-toast {
+  pointer-events: none;
+  max-width: calc(100% - 24px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+  color: var(--text);
+  font-size: 13px;
+  text-align: center;
+}
+
+.hud-toolbar {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.hud-zone-row {
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+}
+
+.hud-zone-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hud-zone-btn.active {
+  background: var(--hud-track);
+}
+
+.hud-zone-residential.active {
+  box-shadow: inset 0 0 0 2px var(--hud-residential);
+}
+
+.hud-zone-commercial.active {
+  box-shadow: inset 0 0 0 2px var(--hud-commercial);
+}
+
+.hud-zone-industrial.active {
+  box-shadow: inset 0 0 0 2px var(--hud-industrial);
+}
+
+/**
+ * 道路ツールのサブ選択（T7 §1）。区画の hud-zone-row/-btn と同じ位置・同じ形にする
+ * （設計書の指示）。色分けは無い（区画の RCI トークンと違い、道路ランクに固有色を
+ * 割り当てていないため。ランクの見た目は道路そのものの太さで表す＝T5）。
+ */
+.hud-road-row {
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+}
+
+.hud-road-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hud-road-btn.active {
+  background: var(--hud-track);
+}
+
+/**
+ * ツール本体と撤去を左右に分ける行（`docs/m5-plan.md` §3-1）。
+ * 撤去だけ別ピルにするのは、破壊的な操作を建設系のボタン群から視覚的にも
+ * タップ領域的にも切り離すため（指が滑って隣を押す事故を減らす）。
+ */
+.hud-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+}
+
+.hud-toolbar-inner {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+  scrollbar-width: none;
+}
+
+.hud-toolbar-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.hud-toolbar-demolish {
+  flex: 0 0 auto;
+  display: flex;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+}
+
+.hud-tool-btn {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.hud-tool-btn.active {
+  background: var(--hud-track);
+}
+
+/**
+ * 分析ツールのサブ選択（§3-2）。区画・道路のサブ行（hud-zone-row / hud-road-row）と
+ * 同じ位置・同じ見た目にする。7択で幅を食うので、横スクロールだけは
+ * ツールバー本体（hud-toolbar-inner）に揃えて足してある。
+ */
+.hud-analysis-row {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+  scrollbar-width: none;
+}
+
+.hud-analysis-row::-webkit-scrollbar {
+  display: none;
+}
+
+.hud-analysis-btn {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.hud-analysis-btn.active {
+  background: var(--hud-track);
+}
+
+/** 分析ツールで何かを選んでいる間だけ出す、色の意味の説明（旧 overlay-picker.css から移設） */
+.hud-overlay-hint {
+  pointer-events: none;
+  max-width: calc(100% - 24px);
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 1px 6px var(--hud-shadow);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/** 需要バーの表示・非表示トグル（§3-3）。速度ボタンと同じ形にし、消灯中は薄くする */
+.hud-demand-toggle {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.hud-demand-toggle.active {
+  opacity: 1;
+  background: var(--hud-track);
+}

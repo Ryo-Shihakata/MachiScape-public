@@ -1,0 +1,116 @@
+/**
+ * エリア購入パネル（`docs/m6-plan.md` §2 W1）のスタイル。
+ * `Inspector.tsx` のボトムシート（`inspector.css` の `.ins-*`）と同じ形にそろえるが、
+ * `inspector.css` は他の作業者と同時に触りうるので独立したファイルにする
+ * （`inspector.css` 冒頭のコメントと同じ考え方）。
+ */
+
+.dp-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px 10px calc(96px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dp-card {
+  pointer-events: auto;
+  width: min(320px, 100%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: 0 4px 18px var(--hud-shadow);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.dp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-bottom: 1px solid var(--hud-border);
+}
+
+.dp-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dp-close {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dp-close:hover {
+  background: var(--hud-track);
+}
+
+.dp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 14px;
+}
+
+.dp-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dp-row-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dp-row-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-locked,
+.dp-warn {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.dp-warn {
+  font-weight: 700;
+  color: var(--ins-bad, #c4553f);
+}
+
+.dp-buy {
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: var(--hud-track);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dp-buy:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

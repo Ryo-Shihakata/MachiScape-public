@@ -1,0 +1,25 @@
+/**
+ * 「交通」ツールのサブ行（`docs/m4-ui-design.md` §1.4）。
+ * 区画のサブ行（`.hud-zone-row`, `src/ui/hud.css`）と同じ位置に排他で出るので、
+ * 画面下の段数は増えない。ボタンは置かない：操作はマップ上のタップで完結する
+ * （このファイルの見た目だけの役割）。
+ *
+ * `--panel` / `--hud-shadow` / `--text` は `src/ui/hud.css` / `src/styles.css` の
+ * 既存トークンを再利用する（新しい値をここで定義しない）。
+ */
+
+.hud-traffic-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 2px 10px var(--hud-shadow);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}

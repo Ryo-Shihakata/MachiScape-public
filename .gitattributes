@@ -1,0 +1,13 @@
+# 改行コードはリポジトリ内LFで統一（Windowsでもエディタ側はLFで扱う）
+* text=auto eol=lf
+
+# バイナリは変換しない
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.zip binary
